@@ -76,6 +76,7 @@ func podMetricFamilies(allowAnnotationsList, allowLabelsList []string) []generat
 		createPodLabelsGenerator(allowLabelsList),
 		createPodOverheadCPUCoresFamilyGenerator(),
 		createPodOverheadMemoryBytesFamilyGenerator(),
+		createPodOverheadHugepages2MiBytesFamilyGenerator(),
 		createPodOwnerFamilyGenerator(),
 		createPodRestartPolicyFamilyGenerator(),
 		createPodRuntimeClassNameInfoFamilyGenerator(),
@@ -1147,6 +1148,33 @@ func createPodOverheadMemoryBytesFamilyGenerator() generator.FamilyGenerator {
 			if p.Spec.Overhead != nil {
 				for resourceName, val := range p.Spec.Overhead {
 					if resourceName == v1.ResourceMemory {
+						ms = append(ms, &metric.Metric{
+							Value: float64(val.Value()),
+						})
+					}
+				}
+			}
+
+			return &metric.Family{
+				Metrics: ms,
+			}
+		}),
+	)
+}
+
+func createPodOverheadHugepages2MiBytesFamilyGenerator() generator.FamilyGenerator {
+	return *generator.NewFamilyGeneratorWithStability(
+		"kube_pod_overhead_hugepages_2Mi_bytes",
+		"The pod overhead in regards to hugepages-2Mi allocated to a pod.",
+		metric.Gauge,
+		basemetrics.ALPHA,
+		"",
+		wrapPodFunc(func(p *v1.Pod) *metric.Family {
+			ms := []*metric.Metric{}
+
+			if p.Spec.Overhead != nil {
+				for resourceName, val := range p.Spec.Overhead {
+					if resourceName == "hugepages-2Mi" {
 						ms = append(ms, &metric.Metric{
 							Value: float64(val.Value()),
 						})

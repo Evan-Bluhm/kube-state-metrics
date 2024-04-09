@@ -234,6 +234,7 @@ func TestFullScrapeCycle(t *testing.T) {
 # HELP kube_pod_ips Pod IP addresses
 # HELP kube_pod_labels [STABLE] Kubernetes labels converted to Prometheus labels.
 # HELP kube_pod_overhead_cpu_cores The pod overhead in regards to cpu cores associated with running a pod.
+# HELP kube_pod_overhead_hugepages_2Mi_bytes The pod overhead in regards to hugepages-2Mi allocated to a pod.
 # HELP kube_pod_overhead_memory_bytes The pod overhead in regards to memory associated with running a pod.
 # HELP kube_pod_runtimeclass_name_info The runtimeclass associated with the pod.
 # HELP kube_pod_scheduler The scheduler for a pod.
@@ -287,6 +288,7 @@ func TestFullScrapeCycle(t *testing.T) {
 # TYPE kube_pod_ips gauge
 # TYPE kube_pod_labels gauge
 # TYPE kube_pod_overhead_cpu_cores gauge
+# TYPE kube_pod_overhead_hugepages_2Mi_bytes gauge
 # TYPE kube_pod_overhead_memory_bytes gauge
 # TYPE kube_pod_runtimeclass_name_info gauge
 # TYPE kube_pod_scheduler gauge

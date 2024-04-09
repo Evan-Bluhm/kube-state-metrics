@@ -1805,6 +1805,70 @@ func TestPodStore(t *testing.T) {
 			},
 		},
 		{
+			Obj: &v1.Pod{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "pod2",
+					Namespace: "ns2",
+					UID:       "uid2",
+				},
+				Spec: v1.PodSpec{
+					Containers: []v1.Container{
+						{
+							Name: "pod2_con1",
+							Resources: v1.ResourceRequirements{
+								Requests: map[v1.ResourceName]resource.Quantity{
+									v1.ResourceCPU:    resource.MustParse("400m"),
+									v1.ResourceMemory: resource.MustParse("300M"),
+								},
+								Limits: map[v1.ResourceName]resource.Quantity{
+									v1.ResourceCPU:    resource.MustParse("400m"),
+									v1.ResourceMemory: resource.MustParse("300M"),
+								},
+							},
+						},
+						{
+							Name: "pod2_con2",
+							Resources: v1.ResourceRequirements{
+								Requests: map[v1.ResourceName]resource.Quantity{
+									v1.ResourceCPU:    resource.MustParse("500m"),
+									v1.ResourceMemory: resource.MustParse("400M"),
+								},
+								Limits: map[v1.ResourceName]resource.Quantity{
+									v1.ResourceCPU:    resource.MustParse("500m"),
+									v1.ResourceMemory: resource.MustParse("400M"),
+								},
+							},
+						},
+						// A container without a resource specification. No metrics will be emitted for that.
+						{
+							Name: "pod2_con3",
+						},
+					},
+					Overhead: map[v1.ResourceName]resource.Quantity{
+						v1.ResourceCPU:    resource.MustParse("20m"),
+						v1.ResourceMemory: resource.MustParse("100M"),
+						"hugepages-2Mi":   resource.MustParse("4G"),
+					},
+				},
+			},
+			Want: `
+				# HELP kube_pod_overhead_cpu_cores The pod overhead in regards to cpu cores associated with running a pod.
+				# HELP kube_pod_overhead_hugepages_2Mi_bytes The pod overhead in regards to hugepages-2Mi allocated to a pod.
+				# HELP kube_pod_overhead_memory_bytes The pod overhead in regards to memory associated with running a pod.
+				# TYPE kube_pod_overhead_cpu_cores gauge
+				# TYPE kube_pod_overhead_hugepages_2Mi_bytes gauge
+				# TYPE kube_pod_overhead_memory_bytes gauge
+				kube_pod_overhead_cpu_cores{namespace="ns2",pod="pod2",uid="uid2"} 0.02
+				kube_pod_overhead_hugepages_2Mi_bytes{namespace="ns2",pod="pod2",uid="uid2"} 4e+09
+				kube_pod_overhead_memory_bytes{namespace="ns2",pod="pod2",uid="uid2"} 1e+08
+			`,
+			MetricNames: []string{
+				"kube_pod_overhead_cpu_cores",
+				"kube_pod_overhead_hugepages_2Mi_bytes",
+				"kube_pod_overhead_memory_bytes",
+			},
+		},
+		{
 
 			Obj: &v1.Pod{
 				ObjectMeta: metav1.ObjectMeta{
